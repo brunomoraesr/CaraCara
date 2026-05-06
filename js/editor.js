@@ -37,6 +37,8 @@ async function loadBoard() {
     return;
   }
   document.getElementById('board-name').value = board.name;
+  const shareCard = document.getElementById('share-board-card');
+  if (shareCard) { shareCard.hidden = false; document.getElementById('share-board-id').value = boardId; }
   customQuestions     = board.custom_questions || [];
   useDefaultQuestions = board.use_default_questions ?? true;
   const toggle = document.getElementById('use-default-questions');
@@ -404,6 +406,12 @@ function addQuestion() {
 function removeQuestion(i) {
   customQuestions.splice(i, 1);
   renderQuestionsList();
+}
+
+function copyBoardId() {
+  const input = document.getElementById('share-board-id');
+  input.select();
+  navigator.clipboard.writeText(input.value).then(() => showToast('ID copiado!', 'success'));
 }
 
 // ---- Logout ----

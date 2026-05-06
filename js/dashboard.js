@@ -114,6 +114,66 @@ function joinById() {
   window.location.href = `game.html?id=${id}`;
 }
 
+async function importBoard() {
+  const boardId  = document.getElementById('import-board-id').value.trim();
+  const statusEl = document.getElementById('import-status');
+  const btn      = document.getElementById('import-btn');
+  if (!boardId) { statusEl.style.color = 'var(--red)'; statusEl.textContent = 'Cole o ID do tabuleiro.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Importando...';
+  statusEl.textContent = '';
+
+  // Busca o tabuleiro original
+  const { data: board, error: bErr } = await sb.from('boards').select('*').eq('id', boardId).single();
+  if (bErr || !board) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Tabuleiro não encontrado. Verifique o ID.';
+    btn.disabled = false; btn.textContent = 'Importar';
+    return;
+  }
+  if (board.user_id === currentUser.id) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Este tabuleiro já é seu!';
+    btn.disabled = false; btn.textContent = 'Importar';
+    return;
+  }
+
+  // Busca personagens
+  const { data: chars } = await sb.from('characters').select('*').eq('board_id', boardId);
+
+  // Cria cópia do tabuleiro
+  const { data: newBoard, error: nbErr } = await sb.from('boards').insert({
+    user_id:              currentUser.id,
+    name:                 board.name + ' (importado)',
+    custom_questions:     board.custom_questions || [],
+    use_default_questions: board.use_default_questions ?? true,
+  }).select().single();
+
+  if (nbErr) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Erro ao criar cópia: ' + nbErr.message;
+    btn.disabled = false; btn.textContent = 'Importar';
+    return;
+  }
+
+  // Copia personagens (reusa as URLs de foto originais)
+  if (chars?.length) {
+    const inserts = chars.map(c => ({
+      board_id:  newBoard.id,
+      position:  c.position,
+      name:      c.name,
+      photo_url: c.photo_url || null,
+    }));
+    await sb.from('characters').insert(inserts);
+  }
+
+  statusEl.style.color = 'var(--green-d)';
+  statusEl.textContent = `✅ "${board.name}" importado com sucesso!`;
+  document.getElementById('import-board-id').value = '';
+  btn.disabled = false; btn.textContent = 'Importar';
+  await loadBoards();
+}
+
 async function doLogout() {
   await sb.auth.signOut();
   location.href = 'index.html';
