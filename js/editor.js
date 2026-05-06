@@ -37,8 +37,10 @@ async function loadBoard() {
     return;
   }
   document.getElementById('board-name').value = board.name;
-  const shareCard = document.getElementById('share-board-card');
-  if (shareCard) { shareCard.hidden = false; document.getElementById('share-board-id').value = boardId; }
+  const shareCard  = document.getElementById('share-board-card');
+  const importCard = document.getElementById('import-board-card');
+  if (shareCard)  { shareCard.hidden  = false; document.getElementById('share-board-id').value = boardId; }
+  if (importCard) { importCard.hidden = true; }
   customQuestions     = board.custom_questions || [];
   useDefaultQuestions = board.use_default_questions ?? true;
   const toggle = document.getElementById('use-default-questions');
@@ -406,6 +408,55 @@ function addQuestion() {
 function removeQuestion(i) {
   customQuestions.splice(i, 1);
   renderQuestionsList();
+}
+
+async function importBoardInEditor() {
+  const id       = document.getElementById('import-id-input').value.trim();
+  const statusEl = document.getElementById('import-editor-status');
+  const btn      = document.getElementById('import-board-btn');
+  if (!id) { statusEl.style.color = 'var(--red)'; statusEl.textContent = 'Cole o ID do tabuleiro.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Importando...';
+  statusEl.textContent = '';
+
+  const { data: board, error: bErr } = await sb.from('boards').select('*').eq('id', id).single();
+  if (bErr || !board) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Tabuleiro não encontrado.';
+    btn.disabled = false; btn.textContent = 'Importar';
+    return;
+  }
+  if (board.user_id === currentUser.id) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Este tabuleiro já é seu!';
+    btn.disabled = false; btn.textContent = 'Importar';
+    return;
+  }
+
+  const { data: charList } = await sb.from('characters').select('*').eq('board_id', id);
+
+  const { data: newBoard, error: nbErr } = await sb.from('boards').insert({
+    user_id:               currentUser.id,
+    name:                  board.name + ' (importado)',
+    custom_questions:      board.custom_questions || [],
+    use_default_questions: board.use_default_questions ?? true,
+  }).select().single();
+
+  if (nbErr) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Erro: ' + nbErr.message;
+    btn.disabled = false; btn.textContent = 'Importar';
+    return;
+  }
+
+  if (charList?.length) {
+    await sb.from('characters').insert(charList.map(c => ({
+      board_id: newBoard.id, position: c.position, name: c.name, photo_url: c.photo_url || null,
+    })));
+  }
+
+  showToast('Tabuleiro importado! Abrindo editor...', 'success');
+  setTimeout(() => { location.href = `editor.html?id=${newBoard.id}`; }, 1200);
 }
 
 function copyBoardId() {
