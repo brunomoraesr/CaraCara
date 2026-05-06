@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cara a Cara — Painel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="dashboard.html" class="navbar-brand">Cara <span>a</span> Cara</a>
+  <div class="navbar-user">
+    <span id="nav-username">...</span>
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sair</button>
+  </div>
+</nav>
+
+<div class="page-content">
+
+  <!-- ---- Meus Tabuleiros ---- -->
+  <div class="page-header">
+    <h1>Meu Painel</h1>
+    <p>Gerencie seus tabuleiros e partidas.</p>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+    <div class="section-title" style="margin:0">
+      Meus Tabuleiros <span class="badge" id="boards-count">0</span>
+    </div>
+    <a href="editor.html" class="btn btn-primary btn-sm">+ Novo Tabuleiro</a>
+  </div>
+  <div id="boards-list" class="loading-screen">Carregando...</div>
+
+  <!-- ---- Nova Partida ---- -->
+  <div style="margin-top:36px;">
+    <div class="section-title">Criar Nova Partida</div>
+    <div class="card" style="max-width:560px;">
+      <div class="field">
+        <label>Tabuleiro</label>
+        <select id="game-board" class="field select">
+          <option value="">Selecione um tabuleiro...</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Modo de Jogo</label>
+        <select id="game-mode">
+          <option value="online">Online — dois jogadores em dispositivos diferentes</option>
+          <option value="local">Local — dois jogadores no mesmo dispositivo</option>
+        </select>
+      </div>
+      <div class="field" id="p2-name-field" hidden>
+        <label>Nome do Jogador 2</label>
+        <input type="text" id="p2-name" placeholder="Ex: Maria">
+      </div>
+      <button class="btn btn-accent btn-full" onclick="createGame()">🎮 Criar Partida</button>
+    </div>
+  </div>
+
+  <!-- ---- Entrar em Partida ---- -->
+  <div style="margin-top:36px;">
+    <div class="section-title">Entrar em uma Partida</div>
+    <div class="card" style="max-width:560px;">
+      <p style="color:var(--muted); font-size:14px; margin-bottom:14px;">
+        Recebeu um link de partida? Cole o ID abaixo ou abra o link diretamente.
+      </p>
+      <div class="input-group">
+        <input type="text" id="join-id" placeholder="ID da partida (ex: abc123...)">
+        <button class="btn btn-primary" onclick="joinById()">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- New game modal (result) -->
+<div class="modal-backdrop" id="created-modal" hidden>
+  <div class="modal" style="text-align:center;">
+    <div style="font-size:48px; margin-bottom:8px;">🎉</div>
+    <h2>Partida criada!</h2>
+    <p style="color:var(--muted); margin:10px 0 20px;">Compartilhe o link abaixo com seu oponente.</p>
+    <div class="input-group" style="margin-bottom:16px;">
+      <input type="text" id="created-link" readonly style="background:var(--bg);">
+      <button class="btn btn-primary" onclick="copyLink()">Copiar</button>
+    </div>
+    <a id="go-to-game" href="#" class="btn btn-accent btn-full">Ir para a Partida</a>
+    <button class="btn btn-ghost btn-full mt-16" onclick="document.getElementById('created-modal').hidden=true">Fechar</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

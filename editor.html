@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cara a Cara — Editor de Tabuleiro</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="dashboard.html" class="navbar-brand">Cara <span>a</span> Cara</a>
+  <div class="navbar-user">
+    <span id="nav-username">...</span>
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sair</button>
+  </div>
+</nav>
+
+<div class="editor-layout">
+
+  <!-- Main: board grid -->
+  <div>
+    <div class="card" style="margin-bottom:20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+      <div class="field" style="flex:1; min-width:200px; margin:0;">
+        <label>Nome do Tabuleiro</label>
+        <input type="text" id="board-name" placeholder="Ex: Família da Páscoa, Turma da escola...">
+      </div>
+      <button class="btn btn-primary" onclick="saveBoard()">💾 Salvar Tabuleiro</button>
+      <a href="dashboard.html" class="btn btn-ghost">← Voltar</a>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <div>
+          <h3 style="font-size:16px; font-weight:800;">Personagens</h3>
+          <p style="font-size:13px; color:var(--muted); margin-top:3px;">
+            Clique em um slot para adicionar ou editar o personagem. Mínimo: 4 personagens.
+          </p>
+        </div>
+        <span id="char-count" style="font-size:13px; color:var(--muted);">0 / 24</span>
+      </div>
+      <div class="char-grid" id="char-grid"></div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="editor-sidebar">
+    <div class="card">
+      <h3>Dicas</h3>
+      <ul style="font-size:13px; color:var(--muted); line-height:1.9; list-style:none; padding:0;">
+        <li>📸 Use fotos reais de rostos para um jogo mais divertido</li>
+        <li>✏️ Clique em qualquer slot para editar</li>
+        <li>🗑️ Clique em "Remover" para limpar um slot</li>
+        <li>⚡ O tabuleiro é salvo automaticamente ao clicar em "Salvar"</li>
+        <li>🎮 Quanto mais personagens, maior o desafio!</li>
+      </ul>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3 style="margin-bottom:12px;">Perguntas Personalizadas</h3>
+
+      <div class="toggle-row">
+        <span class="toggle-label">Perguntas padrão</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="use-default-questions" checked onchange="updateDefaultToggleLabel()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <p id="default-q-hint" style="font-size:11px; color:var(--muted); margin-bottom:14px;">
+        As 30 perguntas padrão ficam disponíveis na partida.
+      </p>
+
+      <p style="font-size:12px; color:var(--muted); margin-bottom:8px; font-weight:700;">
+        Perguntas exclusivas deste tabuleiro:
+      </p>
+      <div id="custom-questions-list"></div>
+      <div class="custom-q-add">
+        <input type="text" id="new-question-input" placeholder="Ex: Usa óculos?" maxlength="80"
+               autocomplete="off" onkeydown="if(event.key==='Enter') addQuestion()">
+        <button class="btn btn-primary btn-sm" onclick="addQuestion()">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Character edit modal -->
+<div class="modal-backdrop" id="char-modal" hidden>
+  <div class="modal">
+    <h2 id="modal-title">Personagem 1</h2>
+
+    <div class="photo-preview" id="photo-preview-area" onclick="document.getElementById('photo-input').click()">
+      <div class="photo-placeholder" id="photo-placeholder">
+        <span>📷</span>Clique para adicionar foto
+      </div>
+    </div>
+    <input type="file" id="photo-input" accept="image/*" hidden onchange="onPhotoSelected(this)">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+      <p style="font-size:12px; color:var(--muted); flex:1;">Clique na área acima para selecionar uma foto (opcional)</p>
+      <button class="btn btn-ghost btn-sm" id="recrop-btn" onclick="reOpenCropper()" hidden>✂️ Recortar</button>
+    </div>
+
+    <div class="field">
+      <label>Nome do Personagem</label>
+      <input type="text" id="char-name-input" placeholder="Ex: Ana, Carlos, Vovó...">
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="remove-btn" onclick="removeChar()">Remover</button>
+      <button class="btn btn-ghost"         onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary"       onclick="saveChar()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Crop modal -->
+<div class="modal-backdrop" id="crop-modal" hidden>
+  <div class="modal" style="max-width:620px;">
+    <h2 style="margin-bottom:6px;">✂️ Ajustar Foto</h2>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
+      Arraste para reposicionar · Scroll para zoom · Use os botões abaixo para girar
+    </p>
+
+    <div style="height:360px; background:#000; border-radius:10px; overflow:hidden; margin-bottom:14px;">
+      <img id="crop-img" style="display:block; max-width:100%; max-height:100%;">
+    </div>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+      <button class="btn btn-ghost btn-sm" onclick="cropperRotate(-90)">↺ Girar esq.</button>
+      <button class="btn btn-ghost btn-sm" onclick="cropperRotate(90)">↻ Girar dir.</button>
+      <button class="btn btn-ghost btn-sm" onclick="cropperZoom(0.15)">🔍 +</button>
+      <button class="btn btn-ghost btn-sm" onclick="cropperZoom(-0.15)">🔎 −</button>
+      <button class="btn btn-ghost btn-sm" onclick="cropperFlipH()">↔ Espelhar</button>
+      <button class="btn btn-ghost btn-sm" onclick="cropperReset()">↩ Resetar</button>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cancelCrop()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmCrop()">✅ Usar esta área</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/editor.js"></script>
+</body>
+</html>

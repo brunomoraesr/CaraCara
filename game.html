@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cara a Cara — Partida</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="game-body">
+
+<!-- Top bar -->
+<nav class="game-navbar">
+  <span class="brand"><span class="logo-a">Cara</span> <span class="logo-b">a</span> <span class="logo-a">Cara</span></span>
+  <span class="board-name" id="nav-board-name">—</span>
+  <span class="players-info" id="nav-players">—</span>
+</nav>
+
+<!-- ===================== GUEST ENTRY ===================== -->
+<div id="section-guest" class="game-section" hidden>
+  <div class="guest-entry-box">
+    <div class="guest-logo">
+      <span class="logo-a">Cara</span> <span class="logo-b">a</span> <span class="logo-a">Cara</span>
+    </div>
+    <p class="guest-subtitle">Você foi convidado para uma partida!</p>
+    <p class="guest-desc">Digite seu nome para entrar como convidado.</p>
+    <div class="field">
+      <label>Seu nome</label>
+      <input type="text" id="guest-name-input" placeholder="Ex: Maria" maxlength="20" autocomplete="off">
+    </div>
+    <div id="guest-error" style="color:var(--red);font-size:13px;min-height:18px;margin-bottom:12px;"></div>
+    <button class="btn btn-primary btn-full" id="guest-enter-btn">Entrar na Partida →</button>
+  </div>
+</div>
+
+<!-- ===================== LOADING ===================== -->
+<div id="section-loading" class="game-section">
+  <div class="loading-screen" style="height:calc(100vh - 56px);">
+    <div>
+      <div class="spinner" style="margin-bottom:12px;"></div>
+      <p>Carregando partida...</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== WAITING (online only) ===================== -->
+<div id="section-waiting" class="game-section" hidden>
+  <div class="waiting-box">
+    <div class="spinner"></div>
+    <h2>Aguardando oponente</h2>
+    <p id="waiting-msg">Compartilhe o link abaixo para o seu oponente entrar na partida.</p>
+    <div class="link-copy-box">
+      <input type="text" id="game-link" readonly>
+      <button class="btn btn-primary" onclick="copyGameLink()">Copiar</button>
+    </div>
+    <a href="dashboard.html" class="btn btn-ghost btn-sm">← Voltar ao painel</a>
+  </div>
+</div>
+
+<!-- ===================== SELECTING ===================== -->
+<div id="section-selecting" class="game-section" hidden>
+  <!-- Content dynamically rendered -->
+</div>
+
+<!-- ===================== PASS DEVICE — seleção local ===================== -->
+<div id="section-pass-device" class="game-section" hidden>
+  <div class="pass-device-screen">
+    <div class="icon">📱</div>
+    <h2 id="pass-device-title">Vez do Jogador 2</h2>
+    <p id="pass-device-msg">Passe o dispositivo para o próximo jogador e peça que ele clique em "Estou pronto".</p>
+    <button class="btn btn-success btn-lg" id="pass-device-btn">Estou pronto — mostrar o tabuleiro</button>
+  </div>
+</div>
+
+<!-- ===================== PLAYING ===================== -->
+<div id="section-playing" class="game-section" hidden style="padding:0;">
+  <div class="game-layout">
+
+    <!-- Board -->
+    <div class="board-area">
+      <div class="board-frame">
+
+        <!-- Topo: nome do jogador atual + dica -->
+        <div class="bf-header">
+          <div class="bf-player-badge" id="bf-player-badge">—</div>
+          <span class="bf-hint">Clique para eliminar · clique novamente para restaurar</span>
+        </div>
+
+        <!-- Tabuleiro de cartas -->
+        <div class="board-tray">
+          <div class="game-board" id="game-board"></div>
+        </div>
+
+        <!-- Rodapé: branding igual ao jogo físico -->
+        <div class="bf-base">
+          <span>C·A·R·A &nbsp;·&nbsp; A &nbsp;·&nbsp; C·A·R·A</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Painel direito -->
+    <div class="game-panel">
+      <div class="panel-top" id="panel-top"><!-- dynamic --></div>
+      <div class="panel-bottom">
+        <div class="log-title">Histórico da Partida</div>
+        <ul class="log-list" id="game-log-list"></ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== TROCA DE TURNO LOCAL ===================== -->
+<!-- Overlay que esconde o tabuleiro entre turnos no modo local -->
+<div id="local-turn-overlay" class="local-turn-overlay" hidden>
+  <div class="lto-box">
+    <div class="lto-icon">🔄</div>
+    <h2 class="lto-title">Turno encerrado!</h2>
+    <p class="lto-sub">Vez de <strong id="lto-next-name">—</strong></p>
+    <p class="lto-hint">Passe o dispositivo para o próximo jogador antes de continuar.</p>
+    <button class="btn btn-success btn-lg" onclick="continueLocalTurn()">
+      Estou pronto — ver meu tabuleiro
+    </button>
+  </div>
+</div>
+
+<!-- ===================== FINISHED ===================== -->
+<div id="section-finished" class="game-section" hidden>
+  <!-- dynamic -->
+</div>
+
+<!-- Character confirm modal -->
+<div class="modal-backdrop" id="char-confirm-modal" hidden>
+  <div class="modal char-confirm-modal-box">
+    <div class="char-confirm-avatar" id="char-confirm-avatar"></div>
+    <h3 class="char-confirm-name" id="char-confirm-name"></h3>
+    <p class="char-confirm-question">Deseja escolher este personagem como seu segredo?</p>
+    <div class="modal-footer" style="justify-content:center;gap:12px;">
+      <button class="btn btn-ghost" id="char-confirm-cancel">Cancelar</button>
+      <button class="btn btn-success btn-lg" id="char-confirm-ok">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Guess confirm modal -->
+<div class="modal-backdrop" id="guess-confirm-modal" hidden>
+  <div class="modal char-confirm-modal-box">
+    <p style="font-size:12px;color:#64748b;margin-bottom:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">🎯 Confirmar Palpite</p>
+    <div class="char-confirm-avatar" id="guess-confirm-avatar"></div>
+    <h3 class="char-confirm-name" id="guess-confirm-name"></h3>
+    <p class="char-confirm-question">Este é o personagem secreto do seu oponente?</p>
+    <div class="modal-footer" style="justify-content:center;gap:12px;">
+      <button class="btn btn-ghost" id="guess-confirm-cancel">← Voltar</button>
+      <button class="btn btn-accent btn-lg" id="guess-confirm-ok">🎯 Confirmar!</button>
+    </div>
+  </div>
+</div>
+
+<!-- Guess modal -->
+<div class="modal-backdrop" id="guess-modal" hidden>
+  <div class="modal">
+    <h2>🎯 Tentar Adivinhar</h2>
+    <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">
+      Qual é o personagem secreto do seu oponente?
+    </p>
+    <div class="guess-modal-grid" id="guess-modal-grid"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('guess-modal').hidden=true">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

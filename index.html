@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cara a Cara — Login</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <span class="logo-a">Cara</span> <span class="logo-b">a</span> <span class="logo-a">Cara</span>
+    </div>
+    <p class="auth-subtitle">O clássico jogo de adivinhar personagens — agora online!</p>
+
+    <!-- Login -->
+    <div id="form-login" class="auth-form">
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="auth-error" id="login-error"></div>
+      <button class="btn btn-primary btn-full mt-16" id="login-btn" onclick="doLogin()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script>
+  // Redirect if already logged in
+  (async () => {
+    const user = await getUser();
+    if (user) location.href = 'dashboard.html';
+  })();
+
+  async function doLogin() {
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errEl    = document.getElementById('login-error');
+    const btn      = document.getElementById('login-btn');
+    errEl.textContent = '';
+    btn.disabled = true; btn.textContent = 'Entrando...';
+
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      errEl.textContent = 'E-mail ou senha inválidos.';
+      btn.disabled = false; btn.textContent = 'Entrar';
+    } else {
+      location.href = 'dashboard.html';
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+</script>
+</body>
+</html>
