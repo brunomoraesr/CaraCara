@@ -395,6 +395,15 @@ function renderQuestionsList() {
   `).join('');
 }
 
+async function saveQuestionsAuto() {
+  if (!boardId) return; // tabuleiro ainda não salvo; perguntas serão incluídas no saveBoard()
+  const { error } = await sb.from('boards')
+    .update({ custom_questions: customQuestions })
+    .eq('id', boardId);
+  if (error) showToast('Erro ao salvar perguntas: ' + error.message, 'error');
+  else       showToast('Pergunta(s) salva(s)!', 'success');
+}
+
 function addQuestion() {
   const input = document.getElementById('new-question-input');
   const text  = input.value.trim();
@@ -403,11 +412,13 @@ function addQuestion() {
   customQuestions.push(text);
   input.value = '';
   renderQuestionsList();
+  saveQuestionsAuto();
 }
 
 function removeQuestion(i) {
   customQuestions.splice(i, 1);
   renderQuestionsList();
+  saveQuestionsAuto();
 }
 
 function addDefaultQuestions() {
@@ -418,12 +429,9 @@ function addDefaultQuestions() {
       added++;
     }
   });
-  if (added) {
-    showToast(`${added} pergunta(s) padrão adicionada(s)!`, 'success');
-    renderQuestionsList();
-  } else {
-    showToast('Todas as perguntas padrão já estão na lista.', 'info');
-  }
+  if (!added) { showToast('Todas as perguntas padrão já estão na lista.', 'info'); return; }
+  renderQuestionsList();
+  saveQuestionsAuto();
 }
 
 function exportQuestionsToFile() {
@@ -456,12 +464,9 @@ function importQuestionsFromFile(input) {
       }
     });
     input.value = '';
-    if (added) {
-      showToast(`${added} pergunta(s) importada(s)!`, 'success');
-      renderQuestionsList();
-    } else {
-      showToast('Nenhuma pergunta nova encontrada no arquivo.', 'info');
-    }
+    if (!added) { showToast('Nenhuma pergunta nova encontrada no arquivo.', 'info'); return; }
+    renderQuestionsList();
+    saveQuestionsAuto();
   };
   reader.readAsText(file, 'UTF-8');
 }
