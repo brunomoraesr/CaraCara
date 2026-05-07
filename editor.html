@@ -105,6 +105,20 @@
                autocomplete="off" onkeydown="if(event.key==='Enter') addQuestion()">
         <button class="btn btn-primary btn-sm" onclick="addQuestion()">+ Add</button>
       </div>
+
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <button class="btn btn-ghost btn-sm" style="flex:1; justify-content:center;"
+                onclick="addDefaultQuestions()">📋 Adicionar padrão (30)</button>
+        <label class="btn btn-ghost btn-sm" style="flex:1; justify-content:center; cursor:pointer;">
+          📂 Importar .txt
+          <input type="file" id="import-q-file" accept=".txt" hidden onchange="importQuestionsFromFile(this)">
+        </label>
+        <button class="btn btn-ghost btn-sm" style="flex:1; justify-content:center;"
+                onclick="exportQuestionsToFile()">⬇️ Exportar .txt</button>
+      </div>
+      <p style="font-size:11px; color:var(--muted); margin-top:6px;">
+        .txt: uma pergunta por linha
+      </p>
     </div>
   </div>
 
@@ -170,6 +184,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script src="js/config.js"></script>
+<script src="js/questions.js"></script>
 <script src="js/editor.js"></script>
 </body>
 </html>

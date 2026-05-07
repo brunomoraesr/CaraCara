@@ -10,6 +10,7 @@ async function init() {
   document.getElementById('nav-username').textContent = userProfile?.username || currentUser.email;
 
   await loadBoards();
+  await loadGameHistory();
 
   // Toggle local mode player2 name field
   document.getElementById('game-mode').addEventListener('change', e => {
@@ -172,6 +173,55 @@ async function importBoard() {
   document.getElementById('import-board-id').value = '';
   btn.disabled = false; btn.textContent = 'Importar';
   await loadBoards();
+}
+
+async function loadGameHistory() {
+  const { data, error } = await sb
+    .from('games')
+    .select('id, player1_id, player2_id, player1_name, player2_name, winner, mode, created_at')
+    .eq('status', 'finished')
+    .or(`player1_id.eq.${currentUser.id},player2_id.eq.${currentUser.id}`)
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  if (error) { showToast('Erro ao carregar histórico', 'error'); return; }
+  renderGameHistory(data || []);
+}
+
+function renderGameHistory(games) {
+  const el      = document.getElementById('history-list');
+  const countEl = document.getElementById('history-count');
+  countEl.textContent = games.length;
+
+  if (!games.length) {
+    el.className = '';
+    el.innerHTML = `
+      <div class="empty-state">
+        <p>Nenhuma partida finalizada ainda.</p>
+      </div>`;
+    return;
+  }
+
+  el.className = '';
+  el.innerHTML = games.map(g => {
+    const myNum   = g.player1_id === currentUser.id ? 1 : 2;
+    const iWon    = g.winner === myNum;
+    const oppName = myNum === 1 ? (g.player2_name || 'Convidado') : g.player1_name;
+    const date    = new Date(g.created_at).toLocaleDateString('pt-BR');
+    const mode    = g.mode === 'local' ? 'Local' : 'Online';
+
+    return `
+      <div class="history-card ${iWon ? 'history-win' : 'history-loss'}">
+        <div class="history-result">
+          <span class="history-emoji">${iWon ? '🏆' : '😔'}</span>
+          <span class="history-label">${iWon ? 'Vitória' : 'Derrota'}</span>
+        </div>
+        <div class="history-info">
+          <div class="history-vs">vs. ${escapeHtml(oppName)}</div>
+          <div class="history-meta">${date} · ${mode}</div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 async function doLogout() {

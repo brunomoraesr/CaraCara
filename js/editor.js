@@ -410,6 +410,62 @@ function removeQuestion(i) {
   renderQuestionsList();
 }
 
+function addDefaultQuestions() {
+  let added = 0;
+  QUESTIONS.forEach(q => {
+    if (!customQuestions.includes(q.text)) {
+      customQuestions.push(q.text);
+      added++;
+    }
+  });
+  if (added) {
+    showToast(`${added} pergunta(s) padrão adicionada(s)!`, 'success');
+    renderQuestionsList();
+  } else {
+    showToast('Todas as perguntas padrão já estão na lista.', 'info');
+  }
+}
+
+function exportQuestionsToFile() {
+  if (!customQuestions.length) { showToast('Nenhuma pergunta para exportar.', 'error'); return; }
+  const content  = customQuestions.join('\n');
+  const blob     = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url      = URL.createObjectURL(blob);
+  const a        = document.createElement('a');
+  const name     = document.getElementById('board-name').value.trim() || 'tabuleiro';
+  a.href         = url;
+  a.download     = `perguntas-${name}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importQuestionsFromFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l.length > 2 && l.length <= 120);
+    let added = 0;
+    lines.forEach(q => {
+      if (!customQuestions.includes(q)) {
+        customQuestions.push(q);
+        added++;
+      }
+    });
+    input.value = '';
+    if (added) {
+      showToast(`${added} pergunta(s) importada(s)!`, 'success');
+      renderQuestionsList();
+    } else {
+      showToast('Nenhuma pergunta nova encontrada no arquivo.', 'info');
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
 async function importBoardInEditor() {
   const id       = document.getElementById('import-id-input').value.trim();
   const statusEl = document.getElementById('import-editor-status');

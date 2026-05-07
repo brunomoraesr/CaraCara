@@ -205,6 +205,27 @@ body {
 .input-group { display: flex; gap: 8px; }
 .input-group input { flex: 1; }
 
+/* Game history */
+.history-card {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--surface); border-radius: var(--radius);
+  padding: 14px 18px; margin-bottom: 8px;
+  box-shadow: var(--shadow); border-left: 4px solid transparent;
+}
+.history-win  { border-left-color: var(--green); }
+.history-loss { border-left-color: var(--red); }
+.history-result {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 58px; gap: 2px;
+}
+.history-emoji { font-size: 22px; line-height: 1; }
+.history-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+.history-win  .history-label { color: var(--green-d); }
+.history-loss .history-label { color: var(--red); }
+.history-info { min-width: 0; }
+.history-vs   { font-size: 15px; font-weight: 800; color: var(--text); }
+.history-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
 /* =============================================
    BOARD EDITOR PAGE
    ============================================= */
@@ -561,6 +582,61 @@ body.game-body {
 .my-secret-card .mini-info { min-width: 0; }
 .my-secret-card .mini-label { font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
 .my-secret-card .mini-name { font-size: 14px; font-weight: 800; color: var(--amber); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Q&A Collected Answers section */
+.panel-qa {
+  border-bottom: 1px solid #334155;
+  display: flex; flex-direction: column;
+  max-height: 260px; flex-shrink: 0;
+}
+.panel-qa.panel-qa-full {
+  border-bottom: none;
+  flex: 1; max-height: none; overflow: hidden;
+}
+.qa-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px 6px; flex-shrink: 0;
+}
+.qa-header-title {
+  font-size: 11px; font-weight: 700; color: #64748b;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.qa-badge {
+  background: var(--blue); color: #fff;
+  font-size: 10px; font-weight: 800;
+  padding: 2px 7px; border-radius: 20px;
+  min-width: 20px; text-align: center; line-height: 1.6;
+}
+.qa-badge:empty { display: none; }
+
+.qa-list {
+  list-style: none; overflow-y: auto; flex: 1;
+  padding: 0 10px 10px; display: flex; flex-direction: column; gap: 6px;
+}
+.qa-list::-webkit-scrollbar { width: 3px; }
+.qa-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+.qa-item {
+  background: #0f172a; border-radius: 8px; padding: 9px 11px;
+  border-left: 3px solid #334155;
+}
+.qa-yes-item     { border-left-color: var(--green); }
+.qa-no-item      { border-left-color: var(--red); }
+.qa-pending-item { border-left-color: var(--amber); }
+
+.qa-question {
+  font-size: 12px; color: #cbd5e1; line-height: 1.4;
+  margin-bottom: 6px;
+}
+.qa-answer-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+}
+.qa-answer { font-size: 13px; font-weight: 800; }
+.qa-answer.qa-yes     { color: var(--green); }
+.qa-answer.qa-no      { color: var(--red); }
+.qa-answer.qa-pending { color: var(--amber); }
+.qa-asker { font-size: 10px; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qa-empty { font-size: 12px; color: #475569; text-align: center; padding: 14px; font-style: italic; }
 
 /* Game log */
 .log-title { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }

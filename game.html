@@ -24,11 +24,11 @@
     <p class="guest-subtitle">Você foi convidado para uma partida!</p>
     <p class="guest-desc">Digite seu nome para entrar como convidado.</p>
     <div class="field">
-      <label>Seu nome</label>
-      <input type="text" id="guest-name-input" placeholder="Ex: Maria" maxlength="20" autocomplete="off">
+      <label>Seu nome <span style="color:var(--red)">*</span></label>
+      <input type="text" id="guest-name-input" placeholder="Digite seu nome" maxlength="20" autocomplete="off" required>
     </div>
     <div id="guest-error" style="color:var(--red);font-size:13px;min-height:18px;margin-bottom:12px;"></div>
-    <button class="btn btn-primary btn-full" id="guest-enter-btn">Entrar na Partida →</button>
+    <button class="btn btn-primary btn-full" id="guest-enter-btn" disabled>Entrar na Partida →</button>
   </div>
 </div>
 
@@ -101,9 +101,16 @@
     <!-- Painel direito -->
     <div class="game-panel">
       <div class="panel-top" id="panel-top"><!-- dynamic --></div>
-      <div class="panel-bottom">
-        <div class="log-title">Histórico da Partida</div>
-        <ul class="log-list" id="game-log-list"></ul>
+
+      <!-- Seção de perguntas e respostas coletadas -->
+      <div class="panel-qa panel-qa-full">
+        <div class="qa-header">
+          <span class="qa-header-title">Respostas Coletadas das suas Perguntas</span>
+          <span class="qa-badge" id="qa-count"></span>
+        </div>
+        <ul class="qa-list" id="qa-list">
+          <li class="qa-empty">Nenhuma pergunta feita ainda.</li>
+        </ul>
       </div>
     </div>
 

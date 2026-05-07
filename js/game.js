@@ -94,8 +94,12 @@ function promptGuestName() {
       resolve(name);
     }
 
-    btn.onclick       = submit;
-    input.onkeydown   = e => { if (e.key === 'Enter') submit(); };
+    input.addEventListener('input', () => {
+      btn.disabled = input.value.trim().length < 2;
+    });
+
+    btn.onclick     = submit;
+    input.onkeydown = e => { if (e.key === 'Enter') submit(); };
     setTimeout(() => input.focus(), 100);
   });
 }
@@ -757,30 +761,63 @@ function renderFinished() {
     </div>`;
 }
 
-// ---- Log ----
+// ---- Q&A History ----
 
-function renderLog() {
-  const list = document.getElementById('game-log-list');
+function getQAPairs() {
+  const g = state.game;
+  if (!g) return [];
+
+  // Local: mostra perguntas do jogador cujo turno está ativo; Online: do usuário atual
+  const viewerNum = g.mode === 'local' ? g.current_turn : state.myNum;
+
+  const pairs  = [];
+  const events = state.events;
+  for (let i = 0; i < events.length; i++) {
+    const ev        = events[i];
+    const next      = events[i + 1];
+    const hasAnswer = next?.type === 'answer';
+
+    if (ev.type === 'question') {
+      if (ev.player_num === viewerNum) {
+        pairs.push({ q: ev, a: hasAnswer ? next : null });
+      }
+      if (hasAnswer) i++; // pula a resposta independente de quem perguntou
+    }
+  }
+  return pairs.reverse();
+}
+
+function renderQAHistory() {
+  const list    = document.getElementById('qa-list');
+  const countEl = document.getElementById('qa-count');
   if (!list) return;
 
-  list.innerHTML = [...state.events].reverse().map(ev => {
-    let content = '';
-    switch (ev.type) {
-      case 'question':
-        content = `<strong>${escapeHtml(ev.player_name)}</strong> perguntou: "${escapeHtml(ev.data?.text || '')}"`;
-        break;
-      case 'answer':
-        content = `<strong>${escapeHtml(ev.player_name)}</strong> respondeu: <span class="${ev.data?.answer ? 'yes' : 'no'}">${ev.data?.answer ? 'Sim ✅' : 'Não ❌'}</span>`;
-        break;
-      case 'guess':
-        content = `<strong>${escapeHtml(ev.player_name)}</strong> tentou: <em>${escapeHtml(ev.data?.characterName || '')}</em> — ${ev.data?.correct ? '✅ Correto!' : '❌ Errado!'}`;
-        break;
-      case 'pass_turn':
-        content = `<strong>${escapeHtml(ev.player_name)}</strong> passou a vez`;
-        break;
-    }
-    return `<li class="log-entry log-${ev.type}">${content}</li>`;
-  }).join('');
+  const pairs    = getQAPairs();
+  const answered = pairs.filter(p => p.a).length;
+
+  if (countEl) countEl.textContent = answered || '';
+
+  if (!pairs.length) {
+    list.innerHTML = '<li class="qa-empty">Nenhuma pergunta feita ainda.</li>';
+    return;
+  }
+
+  list.innerHTML = pairs.map(({ q, a }) => `
+    <li class="qa-item${a ? (a.data?.answer ? ' qa-yes-item' : ' qa-no-item') : ' qa-pending-item'}">
+      <div class="qa-question">${escapeHtml(q.data?.text || '')}</div>
+      <div class="qa-answer-row">
+        ${a
+          ? `<span class="qa-answer ${a.data?.answer ? 'qa-yes' : 'qa-no'}">${a.data?.answer ? '✅ SIM' : '❌ NÃO'}</span>`
+          : `<span class="qa-answer qa-pending">⏳ Aguardando...</span>`
+        }
+        <span class="qa-asker">${escapeHtml(q.player_name)}</span>
+      </div>
+    </li>
+  `).join('');
+}
+
+function renderLog() {
+  renderQAHistory();
 }
 
 // ---- Helpers ----
