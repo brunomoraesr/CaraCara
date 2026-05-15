@@ -552,7 +552,8 @@ body.game-body {
 
 .answer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .answer-btns .btn { font-size: 16px; padding: 14px; justify-content: center; }
-.answer-btns .answer-unsure { grid-column: 1 / -1; font-size: 14px; padding: 10px; }
+.answer-btns .answer-unsure { grid-column: 1 / -1; font-size: 14px; padding: 10px; background: #f97316; color: #fff; border-color: #f97316; }
+.answer-btns .answer-unsure:hover:not(:disabled) { background: #ea6c0a; border-color: #ea6c0a; }
 
 .or-divider {
   text-align: center; color: #475569; font-size: 12px; font-weight: 700;
