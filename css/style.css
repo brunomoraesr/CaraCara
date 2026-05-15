@@ -552,6 +552,7 @@ body.game-body {
 
 .answer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .answer-btns .btn { font-size: 16px; padding: 14px; justify-content: center; }
+.answer-btns .answer-unsure { grid-column: 1 / -1; font-size: 14px; padding: 10px; }
 
 .or-divider {
   text-align: center; color: #475569; font-size: 12px; font-weight: 700;
@@ -635,6 +636,8 @@ body.game-body {
 .qa-answer.qa-yes     { color: var(--green); }
 .qa-answer.qa-no      { color: var(--red); }
 .qa-answer.qa-pending { color: var(--amber); }
+.qa-answer.qa-unknown { color: #94a3b8; }
+.qa-unknown-item      { border-left-color: #475569; }
 .qa-asker { font-size: 10px; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qa-empty { font-size: 12px; color: #475569; text-align: center; padding: 14px; font-style: italic; }
 

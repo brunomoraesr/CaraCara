@@ -468,6 +468,7 @@ function renderPanel() {
       <div class="answer-btns">
         <button class="btn btn-success" onclick="doAnswer(true)">✅ SIM</button>
         <button class="btn btn-danger"  onclick="doAnswer(false)">❌ NÃO</button>
+        <button class="btn btn-ghost answer-unsure" onclick="doAnswer(null)">🤷 Não sei</button>
       </div>`;
   } else {
     // Opponent's turn, no pending question
@@ -802,18 +803,30 @@ function renderQAHistory() {
     return;
   }
 
-  list.innerHTML = pairs.map(({ q, a }) => `
-    <li class="qa-item${a ? (a.data?.answer ? ' qa-yes-item' : ' qa-no-item') : ' qa-pending-item'}">
-      <div class="qa-question">${escapeHtml(q.data?.text || '')}</div>
-      <div class="qa-answer-row">
-        ${a
-          ? `<span class="qa-answer ${a.data?.answer ? 'qa-yes' : 'qa-no'}">${a.data?.answer ? '✅ SIM' : '❌ NÃO'}</span>`
-          : `<span class="qa-answer qa-pending">⏳ Aguardando...</span>`
-        }
-        <span class="qa-asker">${escapeHtml(q.player_name)}</span>
-      </div>
-    </li>
-  `).join('');
+  list.innerHTML = pairs.map(({ q, a }) => {
+    let itemClass, answerHtml;
+    if (!a) {
+      itemClass  = 'qa-pending-item';
+      answerHtml = `<span class="qa-answer qa-pending">⏳ Aguardando...</span>`;
+    } else if (a.data?.answer === true) {
+      itemClass  = 'qa-yes-item';
+      answerHtml = `<span class="qa-answer qa-yes">✅ SIM</span>`;
+    } else if (a.data?.answer === false) {
+      itemClass  = 'qa-no-item';
+      answerHtml = `<span class="qa-answer qa-no">❌ NÃO</span>`;
+    } else {
+      itemClass  = 'qa-unknown-item';
+      answerHtml = `<span class="qa-answer qa-unknown">🤷 Não sei</span>`;
+    }
+    return `
+      <li class="qa-item ${itemClass}">
+        <div class="qa-question">${escapeHtml(q.data?.text || '')}</div>
+        <div class="qa-answer-row">
+          ${answerHtml}
+          <span class="qa-asker">${escapeHtml(q.player_name)}</span>
+        </div>
+      </li>`;
+  }).join('');
 }
 
 function renderLog() {
